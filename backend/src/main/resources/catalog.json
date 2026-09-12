@@ -1,0 +1,383 @@
+{
+  "slug": "rma",
+  "name": "知华售后退换与RMA",
+  "subtitle": "退货申请、收货检验、退款审批与售后闭环",
+  "accent": "#486c70",
+  "modules": [
+    {
+      "key": "policies",
+      "label": "售后政策",
+      "description": "退货期限、保修期限与适用规则",
+      "initial": "ACTIVE",
+      "editable": true,
+      "creatable": true,
+      "fields": [
+        {
+          "key": "name",
+          "label": "政策名称",
+          "type": "text",
+          "required": true,
+          "ref": null,
+          "options": [],
+          "min": null,
+          "max": null
+        },
+        {
+          "key": "returnDays",
+          "label": "无理由退货天数",
+          "type": "integer",
+          "required": true,
+          "ref": null,
+          "options": [],
+          "min": "0",
+          "max": "365"
+        },
+        {
+          "key": "warrantyDays",
+          "label": "质量保修天数",
+          "type": "integer",
+          "required": true,
+          "ref": null,
+          "options": [],
+          "min": "1",
+          "max": "3650"
+        }
+      ],
+      "actions": []
+    },
+    {
+      "key": "sales",
+      "label": "销售凭证",
+      "description": "订单商品、成交价格与售后可退数量",
+      "initial": "SOLD",
+      "editable": true,
+      "creatable": true,
+      "fields": [
+        {
+          "key": "orderNo",
+          "label": "原订单号",
+          "type": "text",
+          "required": true,
+          "ref": null,
+          "options": [],
+          "min": null,
+          "max": null
+        },
+        {
+          "key": "sku",
+          "label": "商品 SKU",
+          "type": "text",
+          "required": true,
+          "ref": null,
+          "options": [],
+          "min": null,
+          "max": null
+        },
+        {
+          "key": "soldAt",
+          "label": "购买日期",
+          "type": "date",
+          "required": true,
+          "ref": null,
+          "options": [],
+          "min": null,
+          "max": null
+        },
+        {
+          "key": "quantity",
+          "label": "购买数量",
+          "type": "integer",
+          "required": true,
+          "ref": null,
+          "options": [],
+          "min": "1",
+          "max": "100000"
+        },
+        {
+          "key": "unitPrice",
+          "label": "成交单价",
+          "type": "money",
+          "required": true,
+          "ref": null,
+          "options": [],
+          "min": "0.01",
+          "max": "10000000"
+        },
+        {
+          "key": "policy",
+          "label": "适用政策",
+          "type": "ref",
+          "required": true,
+          "ref": "policies",
+          "options": [],
+          "min": null,
+          "max": null
+        }
+      ],
+      "actions": []
+    },
+    {
+      "key": "returns",
+      "label": "退换申请",
+      "description": "受理、审核、收货、检验、退款或换货结案",
+      "initial": "DRAFT",
+      "editable": true,
+      "creatable": true,
+      "fields": [
+        {
+          "key": "sale",
+          "label": "销售凭证",
+          "type": "ref",
+          "required": true,
+          "ref": "sales",
+          "options": [],
+          "min": null,
+          "max": null
+        },
+        {
+          "key": "quantity",
+          "label": "申请数量",
+          "type": "integer",
+          "required": true,
+          "ref": null,
+          "options": [],
+          "min": "1",
+          "max": "100000"
+        },
+        {
+          "key": "requestedAt",
+          "label": "申请日期",
+          "type": "date",
+          "required": true,
+          "ref": null,
+          "options": [],
+          "min": null,
+          "max": null
+        },
+        {
+          "key": "reason",
+          "label": "售后原因",
+          "type": "select",
+          "required": true,
+          "ref": null,
+          "options": [
+            "DEFECT",
+            "NO_REASON"
+          ],
+          "min": null,
+          "max": null
+        },
+        {
+          "key": "requestType",
+          "label": "处理方式",
+          "type": "select",
+          "required": true,
+          "ref": null,
+          "options": [
+            "REFUND",
+            "REPLACE"
+          ],
+          "min": null,
+          "max": null
+        },
+        {
+          "key": "description",
+          "label": "问题说明",
+          "type": "text",
+          "required": true,
+          "ref": null,
+          "options": [],
+          "min": null,
+          "max": null
+        }
+      ],
+      "actions": [
+        {
+          "key": "submit",
+          "label": "提交售后审核",
+          "from": [
+            "DRAFT"
+          ],
+          "to": "REVIEW",
+          "role": "OPERATOR",
+          "separate": false,
+          "fields": []
+        },
+        {
+          "key": "approve",
+          "label": "审核通过",
+          "from": [
+            "REVIEW"
+          ],
+          "to": "APPROVED",
+          "role": "REVIEWER",
+          "separate": true,
+          "fields": []
+        },
+        {
+          "key": "reject",
+          "label": "审核驳回",
+          "from": [
+            "REVIEW"
+          ],
+          "to": "REJECTED",
+          "role": "REVIEWER",
+          "separate": true,
+          "fields": [
+            {
+              "key": "reason",
+              "label": "驳回原因",
+              "type": "text",
+              "required": true,
+              "ref": null,
+              "options": [],
+              "min": null,
+              "max": null
+            }
+          ]
+        },
+        {
+          "key": "receive",
+          "label": "确认收货",
+          "from": [
+            "APPROVED"
+          ],
+          "to": "RECEIVED",
+          "role": "OPERATOR",
+          "separate": false,
+          "fields": []
+        },
+        {
+          "key": "inspect",
+          "label": "检验登记",
+          "from": [
+            "RECEIVED"
+          ],
+          "to": "INSPECTED",
+          "role": "REVIEWER",
+          "separate": true,
+          "fields": [
+            {
+              "key": "result",
+              "label": "检验结果",
+              "type": "select",
+              "required": true,
+              "ref": null,
+              "options": [
+                "PASS",
+                "FAIL"
+              ],
+              "min": null,
+              "max": null
+            },
+            {
+              "key": "comment",
+              "label": "检验说明",
+              "type": "text",
+              "required": true,
+              "ref": null,
+              "options": [],
+              "min": null,
+              "max": null
+            }
+          ]
+        },
+        {
+          "key": "settle",
+          "label": "执行退款或换货",
+          "from": [
+            "INSPECTED"
+          ],
+          "to": "SETTLED",
+          "role": "ADMIN",
+          "separate": true,
+          "fields": [
+            {
+              "key": "reference",
+              "label": "退款单号或换货单号",
+              "type": "text",
+              "required": true,
+              "ref": null,
+              "options": [],
+              "min": null,
+              "max": null
+            }
+          ]
+        },
+        {
+          "key": "close",
+          "label": "完成结案",
+          "from": [
+            "SETTLED"
+          ],
+          "to": "CLOSED",
+          "role": "ADMIN",
+          "separate": true,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "key": "inspections",
+      "label": "检验记录",
+      "description": "每次收货检验的不可修改流水",
+      "initial": "PENDING",
+      "editable": false,
+      "creatable": false,
+      "fields": [
+        {
+          "key": "return",
+          "label": "售后单",
+          "type": "ref",
+          "required": true,
+          "ref": "returns",
+          "options": [],
+          "min": null,
+          "max": null
+        },
+        {
+          "key": "result",
+          "label": "结果",
+          "type": "text",
+          "required": true,
+          "ref": null,
+          "options": [],
+          "min": null,
+          "max": null
+        }
+      ],
+      "actions": []
+    },
+    {
+      "key": "settlements",
+      "label": "处理流水",
+      "description": "退款金额或换货数量的不可修改流水",
+      "initial": "POSTED",
+      "editable": false,
+      "creatable": false,
+      "fields": [
+        {
+          "key": "return",
+          "label": "售后单",
+          "type": "ref",
+          "required": true,
+          "ref": "returns",
+          "options": [],
+          "min": null,
+          "max": null
+        },
+        {
+          "key": "reference",
+          "label": "外部处理单号",
+          "type": "text",
+          "required": true,
+          "ref": null,
+          "options": [],
+          "min": null,
+          "max": null
+        }
+      ],
+      "actions": []
+    }
+  ]
+}
