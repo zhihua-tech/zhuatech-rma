@@ -1,0 +1,135 @@
+[
+  {
+    "op": "create",
+    "as": "policy",
+    "module": "policies",
+    "data": {
+      "name": "标准售后政策",
+      "returnDays": 14,
+      "warrantyDays": 365
+    }
+  },
+  {
+    "op": "create",
+    "as": "sale",
+    "module": "sales",
+    "data": {
+      "orderNo": "SO-2026-001",
+      "sku": "GW-001",
+      "soldAt": "$today-5",
+      "quantity": 2,
+      "unitPrice": 100,
+      "policy": "$policy.id"
+    }
+  },
+  {
+    "op": "create",
+    "as": "too_many",
+    "module": "returns",
+    "data": {
+      "sale": "$sale.id",
+      "quantity": 3,
+      "requestedAt": "$today",
+      "reason": "DEFECT",
+      "requestType": "REFUND",
+      "description": "设备无法启动"
+    },
+    "error": 409
+  },
+  {
+    "op": "create",
+    "as": "rma",
+    "module": "returns",
+    "data": {
+      "sale": "$sale.id",
+      "quantity": 1,
+      "requestedAt": "$today",
+      "reason": "DEFECT",
+      "requestType": "REFUND",
+      "description": "设备无法启动"
+    }
+  },
+  {
+    "op": "action",
+    "target": "rma",
+    "action": "submit"
+  },
+  {
+    "op": "action",
+    "target": "rma",
+    "action": "approve",
+    "role": "operator",
+    "error": 403
+  },
+  {
+    "op": "action",
+    "target": "rma",
+    "action": "approve",
+    "role": "reviewer"
+  },
+  {
+    "op": "action",
+    "target": "rma",
+    "action": "receive"
+  },
+  {
+    "op": "action",
+    "target": "rma",
+    "action": "inspect",
+    "role": "reviewer",
+    "data": {
+      "result": "PASS",
+      "comment": "故障复现，核准退款"
+    }
+  },
+  {
+    "op": "action",
+    "target": "rma",
+    "action": "settle",
+    "role": "admin",
+    "data": {
+      "reference": "REFUND-2026-001"
+    }
+  },
+  {
+    "op": "find",
+    "as": "settlement",
+    "module": "settlements",
+    "where": {
+      "data.reference": "REFUND-2026-001"
+    }
+  },
+  {
+    "op": "check",
+    "target": "settlement",
+    "expect": {
+      "state": "POSTED",
+      "data.amount": 100
+    }
+  },
+  {
+    "op": "action",
+    "target": "rma",
+    "action": "close",
+    "role": "admin"
+  },
+  {
+    "op": "check",
+    "target": "rma",
+    "expect": {
+      "state": "CLOSED",
+      "data.settlementAmount": 100
+    }
+  },
+  {
+    "op": "count",
+    "module": "inspections",
+    "count": 1
+  },
+  {
+    "op": "metric",
+    "expect": {
+      "已结案退换": 1
+    }
+  }
+]
