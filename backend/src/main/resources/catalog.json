@@ -238,14 +238,36 @@
         },
         {
           "key": "receive",
-          "label": "确认收货",
+          "label": "登记本次收货",
           "from": [
-            "APPROVED"
+            "APPROVED",
+            "PARTIAL_RECEIVED"
           ],
           "to": "RECEIVED",
           "role": "OPERATOR",
           "separate": false,
-          "fields": []
+          "fields": [
+            {
+              "key": "receivedQuantity",
+              "label": "本次收货数量",
+              "type": "integer",
+              "required": true,
+              "ref": null,
+              "options": [],
+              "min": "1",
+              "max": "100000"
+            },
+            {
+              "key": "receiptReference",
+              "label": "收货凭证号",
+              "type": "text",
+              "required": true,
+              "ref": null,
+              "options": [],
+              "min": null,
+              "max": null
+            }
+          ]
         },
         {
           "key": "inspect",
@@ -316,6 +338,20 @@
           "fields": []
         }
       ]
+    },
+    {
+      "key": "receipts",
+      "label": "收货流水",
+      "description": "分批收货数量、凭证与经办人留痕",
+      "initial": "POSTED",
+      "editable": false,
+      "creatable": false,
+      "fields": [
+        {"key":"return","label":"售后单","type":"ref","required":true,"ref":"returns","options":[],"min":null,"max":null},
+        {"key":"receiptReference","label":"收货凭证号","type":"text","required":true,"ref":null,"options":[],"min":null,"max":null},
+        {"key":"quantity","label":"本次收货数量","type":"integer","required":true,"ref":null,"options":[],"min":"1","max":"100000"}
+      ],
+      "actions": []
     },
     {
       "key": "inspections",
