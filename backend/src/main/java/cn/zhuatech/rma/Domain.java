@@ -61,9 +61,18 @@ import static cn.zhuatech.rma.Engine.*;
     require(e.all(u,"settlements").stream().noneMatch(x->text(x,"reference").equalsIgnoreCase(txt(i,"reference"))),"处理单号重复");
     Row sale=e.ref(u,d,"sale","sales");BigDecimal amount=money(num(sale.data(),"unitPrice").multiply(num(d,"quantity")));
     Map<String,Object> settlement=new LinkedHashMap<>();settlement.put("return",r.id());settlement.put("reference",txt(i,"reference"));settlement.put("type",txt(d,"requestType"));settlement.put("quantity",num(d,"quantity"));settlement.put("amount",txt(d,"requestType").equals("REFUND")?amount:BigDecimal.ZERO);
-    e.ledger(u,"settlements","POSTED",settlement);d.put("settlementReference",txt(i,"reference"));d.put("settlementAmount",settlement.get("amount"));
+    e.ledger(u,"settlements","POSTED",settlement);d.put("settlementReference",txt(i,"reference"));d.put("settlementAmount",settlement.get("amount"));d.put("settledBy",u.username());
    }
-   case "returns.close" -> require(!linked(e,u,"settlements","return",r.id()).isEmpty(),"缺少退款或换货流水");
+   case "returns.reconcile" -> {
+    var settlements=linked(e,u,"settlements","return",r.id());require(settlements.size()==1,"处理流水不完整");
+    require(!u.username().equals(txt(d,"settledBy")),"处理登记人与对账确认人必须分离");
+    String external=txt(i,"externalReference");require(e.all(u,"settlementChecks").stream().noneMatch(x->text(x,"externalReference").equalsIgnoreCase(external)),"外部结果凭证号重复");
+    BigDecimal expected=num(settlements.getFirst().data(),"amount"),actual=num(i,"actualAmount");
+    require(actual.compareTo(expected)==0,"外部实付金额与售后处理金额不一致");
+    e.ledger(u,"settlementChecks","VERIFIED",Map.of("return",r.id(),"settlement",settlements.getFirst().id(),"externalReference",external,"actualAmount",money(actual),"verifiedBy",u.username(),"verifiedAt",Instant.now().toString()));
+    d.put("externalReference",external);d.put("reconciledBy",u.username());d.put("reconciledAt",Instant.now().toString());
+   }
+   case "returns.close" -> require(!linked(e,u,"settlementChecks","return",r.id()).isEmpty(),"缺少外部处理结果对账凭证");
   }
   return null;
  }

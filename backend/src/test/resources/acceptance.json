@@ -111,6 +111,12 @@
       "data.amount": 100
     }
   },
+  {"op":"action","target":"rma","action":"close","role":"admin","error":409},
+  {"op":"action","target":"rma","action":"reconcile","role":"admin","data":{"externalReference":"BANK-2026-001","actualAmount":100},"error":409},
+  {"op":"action","target":"rma","action":"reconcile","role":"reviewer","data":{"externalReference":"BANK-2026-001","actualAmount":90},"error":409},
+  {"op":"action","target":"rma","action":"reconcile","role":"reviewer","data":{"externalReference":"BANK-2026-001","actualAmount":100}},
+  {"op":"check","target":"rma","expect":{"state":"RECONCILED","data.reconciledBy":"reviewer"}},
+  {"op":"count","module":"settlementChecks","count":1},
   {
     "op": "action",
     "target": "rma",
@@ -172,5 +178,11 @@
   {"op":"action","target":"split_return","action":"receive","data":{"receivedQuantity":2,"receiptReference":"RCV-SPLIT-002"},"error":409},
   {"op":"action","target":"split_return","action":"receive","data":{"receivedQuantity":1,"receiptReference":"RCV-SPLIT-002"}},
   {"op":"check","target":"split_return","expect":{"state":"RECEIVED","data.receivedQuantity":2}},
-  {"op":"count","module":"receipts","count":3}
+  {"op":"count","module":"receipts","count":3},
+  {"op":"action","target":"split_return","action":"inspect","role":"reviewer","data":{"result":"PASS","comment":"全部收齐，检验合格"}},
+  {"op":"action","target":"split_return","action":"settle","role":"admin","data":{"reference":"REFUND-SPLIT-002"}},
+  {"op":"action","target":"split_return","action":"reconcile","role":"reviewer","data":{"externalReference":"BANK-2026-001","actualAmount":240},"error":409},
+  {"op":"action","target":"split_return","action":"reconcile","role":"reviewer","data":{"externalReference":"BANK-2026-002","actualAmount":240}},
+  {"op":"action","target":"split_return","action":"close","role":"admin"},
+  {"op":"count","module":"settlementChecks","count":2}
 ]

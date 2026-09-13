@@ -327,10 +327,22 @@
           ]
         },
         {
+          "key": "reconcile",
+          "label": "核对外部退款或换货结果",
+          "from": ["SETTLED"],
+          "to": "RECONCILED",
+          "role": "REVIEWER",
+          "separate": true,
+          "fields": [
+            {"key":"externalReference","label":"外部结果凭证号","type":"text","required":true,"ref":null,"options":[],"min":null,"max":null},
+            {"key":"actualAmount","label":"外部实付金额（换货填 0）","type":"money","required":true,"ref":null,"options":[],"min":"0","max":"999999999999"}
+          ]
+        },
+        {
           "key": "close",
           "label": "完成结案",
           "from": [
-            "SETTLED"
+            "RECONCILED"
           ],
           "to": "CLOSED",
           "role": "ADMIN",
@@ -412,6 +424,20 @@
           "min": null,
           "max": null
         }
+      ],
+      "actions": []
+    },
+    {
+      "key": "settlementChecks",
+      "label": "外部结果对账",
+      "description": "外部退款或换货凭证和金额的独立复核流水",
+      "initial": "VERIFIED",
+      "editable": false,
+      "creatable": false,
+      "fields": [
+        {"key":"return","label":"售后单","type":"ref","required":true,"ref":"returns","options":[],"min":null,"max":null},
+        {"key":"externalReference","label":"外部结果凭证号","type":"text","required":true,"ref":null,"options":[],"min":null,"max":null},
+        {"key":"actualAmount","label":"实付金额","type":"money","required":true,"ref":null,"options":[],"min":null,"max":null}
       ],
       "actions": []
     }
