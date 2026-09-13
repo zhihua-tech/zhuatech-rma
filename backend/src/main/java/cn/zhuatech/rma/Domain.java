@@ -40,7 +40,18 @@ import static cn.zhuatech.rma.Engine.*;
    case "returns.submit" -> checkSale(e,u,d,r);
    case "returns.approve" -> {d.put("approvedBy",u.username());d.put("approvedAt",Instant.now().toString());}
    case "returns.reject" -> {d.put("rejectionReason",txt(i,"reason"));d.put("reviewedBy",u.username());}
-   case "returns.receive" -> {d.put("receivedAt",Instant.now().toString());}
+   case "returns.receive" -> {
+    int requested=num(d,"quantity").intValueExact();
+    int received=d.containsKey("receivedQuantity")?num(d,"receivedQuantity").intValueExact():0;
+    int incoming=num(i,"receivedQuantity").intValueExact();
+    require(received+incoming<=requested,"累计收货数量不能超过申请数量");
+    String reference=txt(i,"receiptReference");
+    require(e.all(u,"receipts").stream().noneMatch(x->text(x,"receiptReference").equalsIgnoreCase(reference)),"收货凭证号重复");
+    Instant now=Instant.now();
+    e.ledger(u,"receipts","POSTED",Map.of("return",r.id(),"receiptReference",reference,"quantity",incoming,"receivedBy",u.username(),"receivedAt",now.toString()));
+    d.put("receivedQuantity",received+incoming);d.put("receivedAt",now.toString());
+    if(received+incoming<requested)return "PARTIAL_RECEIVED";
+   }
    case "returns.inspect" -> {
     String result=txt(i,"result");d.put("inspectionResult",result);d.put("inspectionComment",txt(i,"comment"));
     e.ledger(u,"inspections",result,Map.of("return",r.id(),"result",result,"comment",txt(i,"comment"),"inspector",u.username()));
@@ -56,5 +67,5 @@ import static cn.zhuatech.rma.Engine.*;
   }
   return null;
  }
- public Map<String,Object> metrics(Engine e,User u){return Map.of("待审核退换",e.all(u,"returns").stream().filter(r->r.state().equals("REVIEW")).count(),"待收货退换",e.all(u,"returns").stream().filter(r->r.state().equals("APPROVED")).count(),"已结案退换",e.all(u,"returns").stream().filter(r->r.state().equals("CLOSED")).count());}
+ public Map<String,Object> metrics(Engine e,User u){return Map.of("待审核退换",e.all(u,"returns").stream().filter(r->r.state().equals("REVIEW")).count(),"待收货退换",e.all(u,"returns").stream().filter(r->Set.of("APPROVED","PARTIAL_RECEIVED").contains(r.state())).count(),"已结案退换",e.all(u,"returns").stream().filter(r->r.state().equals("CLOSED")).count());}
 }
