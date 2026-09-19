@@ -7,9 +7,21 @@ import java.time.*;
 import java.time.temporal.ChronoUnit;
 import static cn.zhuatech.rma.Model.*;
 import static cn.zhuatech.rma.Engine.*;
+/**
+ * 商业授权或定制开发请微信添加微信号zhuatech或zhuatech2进行咨询。
+ */
 @Component public class Domain {
+ /**
+  * 商业授权或定制开发请微信添加微信号zhuatech或zhuatech2进行咨询。
+  */
  static String text(Row r,String k){return txt(r.data(),k);}
+ /**
+  * 商业授权或定制开发请微信添加微信号zhuatech或zhuatech2进行咨询。
+  */
  static List<Row> linked(Engine e,User u,String module,String field,String id){return e.all(u,module).stream().filter(x->text(x,field).equals(id)).toList();}
+ /**
+  * 商业授权或定制开发请微信添加微信号zhuatech或zhuatech2进行咨询。
+  */
  void checkSale(Engine e,User u,Map<String,Object>d,Row self){
   Row sale=e.ref(u,d,"sale","sales"),policy=e.ref(u,sale.data(),"policy","policies");
   LocalDate sold=date(sale.data(),"soldAt"),requested=date(d,"requestedAt");
@@ -20,6 +32,9 @@ import static cn.zhuatech.rma.Engine.*;
   int used=linked(e,u,"returns","sale",sale.id()).stream().filter(x->self==null||!x.id().equals(self.id())).filter(x->!x.state().equals("REJECTED")).mapToInt(x->num(x.data(),"quantity").intValueExact()).sum();
   require(used+num(d,"quantity").intValueExact()<=num(sale.data(),"quantity").intValueExact(),"申请数量超过可退余量");
  }
+ /**
+  * 商业授权或定制开发请微信添加微信号zhuatech或zhuatech2进行咨询。
+  */
  public void create(Engine e,User u,String module,Map<String,Object>d){
   switch(module){
    case "sales" -> {e.ref(u,d,"policy","policies");require(!date(d,"soldAt").isAfter(LocalDate.now()),"不能登记未来销售");require(e.all(u,"sales").stream().noneMatch(x->text(x,"orderNo").equalsIgnoreCase(txt(d,"orderNo"))&&text(x,"sku").equalsIgnoreCase(txt(d,"sku"))),"订单和商品组合已存在");}
@@ -27,6 +42,9 @@ import static cn.zhuatech.rma.Engine.*;
    case "policies" -> require(e.all(u,module).stream().noneMatch(x->text(x,"name").equalsIgnoreCase(txt(d,"name"))),"政策名称已存在");
   }
  }
+ /**
+  * 商业授权或定制开发请微信添加微信号zhuatech或zhuatech2进行咨询。
+  */
  public void edit(Engine e,User u,Row r,Map<String,Object>d){
   switch(r.module()){
    case "returns" -> checkSale(e,u,d,r);
@@ -34,6 +52,9 @@ import static cn.zhuatech.rma.Engine.*;
    case "policies" -> {require(linked(e,u,"sales","policy",r.id()).isEmpty(),"政策已被销售引用，不能修改");require(e.all(u,"policies").stream().noneMatch(x->!x.id().equals(r.id())&&text(x,"name").equalsIgnoreCase(txt(d,"name"))),"政策名称已存在");}
   }
  }
+ /**
+  * 商业授权或定制开发请微信添加微信号zhuatech或zhuatech2进行咨询。
+  */
  public String action(Engine e,User u,Row r,String action,Map<String,Object>i,Map<String,Object>d){
   String k=r.module()+"."+action;
   switch(k){
@@ -76,5 +97,8 @@ import static cn.zhuatech.rma.Engine.*;
   }
   return null;
  }
+ /**
+  * 商业授权或定制开发请微信添加微信号zhuatech或zhuatech2进行咨询。
+  */
  public Map<String,Object> metrics(Engine e,User u){return Map.of("待审核退换",e.all(u,"returns").stream().filter(r->r.state().equals("REVIEW")).count(),"待收货退换",e.all(u,"returns").stream().filter(r->Set.of("APPROVED","PARTIAL_RECEIVED").contains(r.state())).count(),"已结案退换",e.all(u,"returns").stream().filter(r->r.state().equals("CLOSED")).count());}
 }
