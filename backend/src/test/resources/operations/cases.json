@@ -1,0 +1,47 @@
+[
+  {
+    "patch": {},
+    "expected": {
+      "decision": "PASS",
+      "candidateRefund": "#280",
+      "remainingPaid": "#800",
+      "refundCeiling": "#280"
+    },
+    "error": false
+  },
+  {
+    "patch": {
+      "returnQty": "9"
+    },
+    "expected": {
+      "decision": "HOLD",
+      "refundCeiling": "#800"
+    },
+    "error": false
+  },
+  {
+    "patch": {
+      "previousRefund": "1001"
+    },
+    "expected": {},
+    "error": true
+  },
+  {
+    "patch": {
+      "fee": "400"
+    },
+    "expected": {
+      "decision": "REVIEW"
+    },
+    "error": false
+  },
+  {
+    "patch": {
+      "returnQty": "0"
+    },
+    "expected": {
+      "decision": "REVIEW"
+    },
+    "error": false
+  }
+]
